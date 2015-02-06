@@ -113,7 +113,7 @@ def plotCrossTalk(inputFile,outputFile):
 	if numChan==4:
 		plot4ChanCrossTalk(baseInfoList,outputFile)
 	elif numChan==2:
-		plit2ChanCrossTalk(baseInfoList,outputFile)
+		plot2ChanCrossTalk(baseInfoList,outputFile)
 
 	
 

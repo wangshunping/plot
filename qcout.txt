@@ -1,5 +1,7 @@
-			
-			{//write gridFitting.QC.txt
+            
+            //cycle: starts from 1, chan = A,C,G,T, subimage is from [1,12]
+            //"cycle chan subimage offsetx offsety rotation scalex scaley MR"
+            {//write gridFitting.QC.txt
                 FILE * file = fopen((crPath / "gridFitting.QC.txt").string().c_str(), "w");
                 for (int cycle = 0; cycle < numCycles; cycle ++ )
                 {
@@ -20,7 +22,7 @@
                 fclose(file);
             }
             
-                    
+            //"cycle chan offsetX, offsetY"
             {//write cropImage.QC.txt
                 FILE * file = fopen((crPath / "cropImage.QC.txt").string().c_str(), "w");
                 for (int cycle = 0; cycle < numCycles; cycle ++ )
@@ -33,11 +35,14 @@
                 fclose(file);
             }
 
+            //mt.makeTemplate(subPointSets, subGridInfos, templateMaps[i], countPoints[i]);
+            //when cycle is 0, it means all cycle template
+            //"cycle subimage pointsCount "
             {//write makeTemplate.QC.txt
                 FILE * file = fopen((crPath / "makeTemplate.QC.txt").string().c_str(), "w");
-				for (int sub = 0; sub < subImageSize; sub++)
+                for (int sub = 0; sub < subImageSize; sub++)
                 {
-					fprintf(file, "0 %d %d\n", sub + 1, cv::countNonZero(templateMaps[sub]));
+                    fprintf(file, "0 %d %d\n", sub + 1, cv::countNonZero(templateMaps[sub]));
                 }
 
                 for (int cycle = 0; cycle < int(countPoints[0].size()); cycle ++ )
@@ -49,7 +54,10 @@
                 }
                 fclose(file);
             }
-			
+            
+            // Crosstalk ct;
+            // ct.getCrosstalk(subPointSets[cycle], mCross[i][cycle], subGridInfos[cycle]);
+            //"cycle subimage AA AC AG AT CC CG CT GG GT TT" 
             {//write crosstalk.QC.txt
                 FILE * file = fopen((crPath / "crosstalk.QC.txt").string().c_str(), "w");
                 for (int cycle = 0; cycle < numCycles; cycle ++ )
