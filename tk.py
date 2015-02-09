@@ -1,11 +1,11 @@
 from Tkinter import *
 import tkMessageBox
 from matplotlib.colors import LogNorm
-#from pylab import *
 import pylab
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 class Application(Frame):
     def __init__(self, master=None):
@@ -14,46 +14,68 @@ class Application(Frame):
         self.createWidgets()
 
     def createWidgets(self):
-        Label(self,text="we do crosstalk right. ",font=("Arial",20)).grid(row=1)
+        Label(self,text="We do crosstalk right. ",font=("Helvetica",20,'bold italic')).grid(row=2,column=1)
  
          #text
-        Label(self,text="Input your Intensity file: ", font=("Arial", 12)).grid(row=3)
-        Label(self,text="Input your Intensity file: ", font=("Arial", 12)).grid(row=3)
+        #Label(self,text="Input your Intensity file: ", font=("Arial", 12)).grid(row=3)
+        Label(self,text="Input your Intensity file: ", font=("Arial", 12)).grid(row=3,sticky=W)
 
          # input 
-        self.nameInput = Entry(self,width=50)
-        self.nameInput.grid(row=3,column=2)
-        
-       
+        self.nameInput = Entry(self,width=70,insertofftime=500,relief='sunken')
+        self.nameInput.grid(row=3,column=1,columnspan=2)
 
-        self.alertButton = Button(self, text='begin_plot', command=self.plot)
-        self.alertButton.grid(row =5 )
+        Label(self,text="-"*100).grid(row=4,column=0,columnspan=3)
+        Label(self,text="Choose a mode to plot:").grid(row=5,column=0,sticky=N)
+        Label(self,text="-"*100).grid(row=6,column=0,columnspan=3)
+
+        self.model = IntVar()
+        self.model.set('1')
+        print self.model.get()
+        Radiobutton(self,variable=self.model,text='Four Channel',indicatoron =0,relief='sunken',value=1).grid(row=7,column=0)
+        Radiobutton(self,variable=self.model,text='AC Channel',indicatoron =0,relief='sunken',value=2).grid(row=7,column=1)
+        Radiobutton(self,variable=self.model,text='GT Channel',indicatoron =0,relief='sunken',value=3).grid(row=7,column=2)
+
+        Label(self,text="-"*100).grid(row=8,column=0,columnspan=3)
+
+        self.alertButton = Button(self, text='plot',font=('Arial',15,'bold'), command=self.plot)
+        self.alertButton.grid(row =9,column=2 )
         
+        Label(self,text="Version 0.9",font=("Arial",10)).grid(row=11,column=2,sticky=SE)
+        Label(self,text="BaseCalling & ImageAnalysis Team",font=("Arial",10)).grid(row=10,column=2,sticky=SE)
+
 
     def plot(self):
         self.inputFile = self.nameInput.get() or 'nice.txt'
-        outputFile = "output.png"
+        try:
+            open(self.inputFile)
+        except:
+            tkMessageBox.showinfo('Message','No such file!')
+        self.inputFile = os.path.abspath(self.inputFile)
+        mydir,file = os.path.split(self.inputFile)   
+        outputFile = self.inputFile + ".png"
         self.baseInfoList,numChan = self.processFile()
 
         #self.plot2ChanCrossTalk(outputFile)
-        
-        if numChan==4:
+        #print self.model;
+        if (numChan==4) & (self.model.get()==1):
             self.plot4ChanCrossTalk(outputFile)
-        elif numChan==2:
-            self.plot2ChanCrossTalk(outputFile)
-
-        tkMessageBox.showinfo('Message', 'done, %s !' % inputFile)    
+        elif self.model.get()==2:
+            self.plotACcrossTalk(outputFile)
+        elif self.model.get()==3:
+            self.plotGTcrossTalk(outputFile)
+        else:
+            tkMessageBox.showinfo('Message', 'done, %s !' % self.inputFile)    
 
 
     def processFile(self):
         totalList=[[],[],[],[]]
-        print len(totalList)
+        #print len(totalList)
         inFile = open(self.inputFile)
         firstLine = inFile.readline()
         fisttmp = firstLine.strip().split()
         
         chan = len(fisttmp) 
-        print chan
+        #print chan
         for line in inFile:
             tmp = line.strip().split()
             for i in xrange(chan):
@@ -100,21 +122,32 @@ class Application(Frame):
         ''
         plt.show()
 
-    def plot2ChanCrossTalk(self,outputFile):
+    def plotACcrossTalk(self,outputFile):
         bases = "ACGT"
         #read a file
         plt.hist2d(self.baseInfoList[0], self.baseInfoList[1], bins=169,norm=LogNorm())
         plt.grid(True)
 
         plt.colorbar()
+        plt.title('A C Crosstalk Plot',multialignment='left', fontsize=20,style='italic',weight=700)
         plt.savefig(outputFile,dpi=250)
         plt.show()
 
+    def plotGTcrossTalk(self,outputFile):
+        bases = "ACGT"
+        #read a file
+        plt.hist2d(self.baseInfoList[2], self.baseInfoList[3], bins=169,norm=LogNorm())
+        plt.grid(True)
+
+        plt.colorbar()
+        plt.title('G T Crosstalk Plot',multialignment='left', fontsize=20,style='italic',weight=700)
+        plt.savefig(outputFile,dpi=250)
+        plt.show()
 
 def main():
     app = Application()
-    app.master.title('Plot CrossTalk...')
-    app.master.geometry('600x800') 
+    app.master.title('Plot CrossTalk... V0.9')
+    app.master.geometry('680x280') 
     app.mainloop()
 
 if __name__ =="__main__":
