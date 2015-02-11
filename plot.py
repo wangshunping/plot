@@ -1,3 +1,4 @@
+import sys
 from matplotlib.colors import LogNorm
 from pylab import *
 #import fileinput
@@ -32,13 +33,13 @@ def temp_processFile(inputFileName):
 
 def processFile(inputFileName):
 	totalList=[[],[],[],[]]
-	print len(totalList)
+	#print len(totalList)
 	inFile = open(inputFileName)
 	firstLine = inFile.readline()
 	fisttmp = firstLine.strip().split()
 	
 	chan = len(fisttmp) 
-	print chan
+	#print chan
 	for line in inFile:
 		tmp = line.strip().split()
 		for i in xrange(chan):
@@ -95,35 +96,55 @@ def plot4ChanCrossTalk(baseInfoList,outputFile):
 	''
 	plt.show()
 
-def plit2ChanCrossTalk(baseInfoList,outputFile):
-	bases = "ACGT"
-	#read a file
-	hist2d(baseInfoList[0], baseInfoList[1], bins=169,norm=LogNorm())
-	grid(True)
 
-	colorbar()
-	plt.savefig(outputFile,dpi=250)
-	plt.show()
+def plotACcrossTalk(baseInfoList,outputFile):
+        bases = "ACGT"
+        #read a file
+        plt.hist2d(baseInfoList[0], baseInfoList[1], bins=169,norm=LogNorm())
+        plt.grid(True)
 
-def plotCrossTalk(inputFile,outputFile):
+        plt.colorbar()
+        plt.title('A C Crosstalk Plot',multialignment='left', fontsize=20,style='italic',weight=700)
+        plt.savefig(outputFile,dpi=250)
+        plt.show()
+
+def plotGTcrossTalk(baseInfoList,outputFile):
+        bases = "ACGT"
+        #read a file
+        plt.hist2d(baseInfoList[2], baseInfoList[3], bins=169,norm=LogNorm())
+        plt.grid(True)
+
+        plt.colorbar()
+        plt.title('G T Crosstalk Plot',multialignment='left', fontsize=20,style='italic',weight=700)
+        plt.savefig(outputFile,dpi=250)
+        plt.show()
+
+
+def plotCrossTalk(inputFile,outputFile,plotWay=1):
 	
 	#read a file
 	baseInfoList,numChan = processFile(inputFile)
 
-	if numChan==4:
+	if plotWay == 1:
 		plot4ChanCrossTalk(baseInfoList,outputFile)
-	elif numChan==2:
-		plot2ChanCrossTalk(baseInfoList,outputFile)
+	elif plotWay==2:
+		plotACcrossTalk(baseInfoList,outputFile)
+	elif plotWay == 3:
+		plotGTcrossTalk(baseInfoList,outputFile)
 
-	
-
-	
 	
 
 def main():
-	inFile = "brilliant.txt"
-	outFile = "shit.png"
-	plotCrossTalk(inFile,outFile)
+	inFile = sys.argv[1]
+	plotWay = int(sys.argv[2])
+	#inFile = "nice.txt"
+	try:
+		open(inFile)
+	except:
+		print "No such file!"
+	outFile = inFile + '.png'
+	#plotWay = 2
+	plotCrossTalk(inFile,outFile,plotWay)
 	
 if __name__=="__main__":
 	main()
